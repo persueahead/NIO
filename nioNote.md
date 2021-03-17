@@ -1,6 +1,6 @@
 # 介绍
 
- Java NIO（New IO）是从**Java 1.4**版本开始引入的一个新的**IO** API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同，**NIO支持面向缓冲区的、基于通道的IO操作。NIO将以更加高效的方式进行文件的读写操作。**
+ **Java NIO**（New IO）是从**Java 1.4**版本开始引入的一个新的**IO** API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同，**NIO支持面向缓冲区的、基于通道的IO操作。NIO将以更加高效的方式进行文件的读写操作。**
 
 # 预备知识
 
@@ -30,7 +30,7 @@ linux整体结构：
 
 ![image-20210315003816351](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315003816351.png)
 
-![0 5 和  javafi, 现 在 叫 虚 似  class 对 象 存 储 在 氵 去  区 中  在 内 存 中 ， 多 线 程 共  亨 堆 和 方 法 区  机 行 引 擎 ： 翻 译 自 ，  将 高 级 自 翻 译 成 机  入 口  Wt 》 a  执 行 引  0 （ ut 处 0  Engine  Cla ” loader  (RuntimeData Area  程 序 计 獭 器  Program （ 0 怡 r Register  将 jvm 字 节 码 文 件  载 到 内 存 中 。 生 成  Class 对 象  栈 ， 程 序 畜 存 器 是 衝  程 序 计 数 器 。 也 叫 PC  本 地 方 口 ： ' | 本 地 方 法 庳 ](file:///C:/Users/夜神/AppData/Local/Temp/msohtmlclip1/01/clip_image001.png)
+![image-20210315232141785](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315232141785.png)
 
 直接内存并不属于JVM的内存结构，它是物理机的内存，但是JVM虚拟机可以调用该部分内存。
 
@@ -204,15 +204,19 @@ public native void putByte(long address, byte x);
 
 1. **操作系统分为栈和堆**，栈由操作系统管理，会有操作系统进行自动回收，堆由用户进行分配使用
 2. JVM内存使用的操作系统的堆，以防JVM分配的内存被操作系统回收
-3. **JVM本地方法栈指的是操作系统的栈**
+3. **JVM的栈相当于操作系统的栈，hotSpot JVM中虚拟机栈和本地方法栈合二为一了
 4. 操作系统的PC寄存器，是计算机上的存储硬件，与内存条一样的硬件，但是寄存区位于CPU内，被称为Cache，用于加快数据访问速度。内存是外挂在CPU的数据总线上的
 5. **JVM PC寄存器位于操作系统的堆中**
 
 
 
-参考：，jvm内存需要增加一个本地方法栈
+
 
 ![image-20210315003641234](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315003641234.png)
+
+## 同步，异步，阻塞，非阻塞
+
+参考：https://www.jb51.net/article/192321.htm
 
 # NIO与IO的主要区别
 
@@ -437,7 +441,7 @@ mark：-1
 
 #### flip
 
-翻转，为读取数据做准备,注意，重置了mark为-1
+翻转，为取（=写）数据做准备,注意，重置了mark为-1
 
 ```java
     public final Buffer flip() {
@@ -675,9 +679,17 @@ get(byte[] dst, int offset, int length)  指定读多少数据到给定数组
 
 ### DMA
 
+#### 什么是DMA？
+
+ https://blog.csdn.net/MiracleWW/article/details/114747638
+
+![img](https://img-blog.csdnimg.cn/20210313150641972.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01pcmFjbGVXVw==,size_16,color_FFFFFF,t_70)
+
 早先  DMA  直接存储器访问
 
-DMA是在专门的硬件（DMA）控制下，实现高速外设和主存储器之间自动成批交换数据尽量减少CPU干预的输入/输出操作方式
+DMA是在专门的硬件（DMA）控制下，**实现高速外设和主存储器之间自动成批交换数据尽量减少CPU干预的输入/输出操作方式**
+
+#### IO过程
 
 大量读写请求会造成DMA总线间的冲突
 
@@ -691,7 +703,7 @@ DMA是在专门的硬件（DMA）控制下，实现高速外设和主存储器�
 
 ### DMA与channel对比
 
-I/O通道控制方式与DMA方式的bai异同点：
+I/O通道控制方式与DMA方式的异同点：
 　　**通道控制**（Channel Control）方式与DMA方式类似，也是一种以内存为中心，实现设备和内存直接交换数据的控制方式。
 　　与**DMA**方式不同的是，**在DMA方式中**，数据的传送方向、存放数据的内存始址以及传送的数据块长度等都由CPU控制，而**在通道方式中**，这些都由通道来进行控制。另外，DMA方式每台设备至少需要一个DMA控制器，一个通道控制器可以控制多台设备。
 
@@ -699,16 +711,38 @@ I/O通道控制方式与DMA方式的bai异同点：
 
 ### 实现类  （通道）
 
+![image-20210317092253422](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317092253422.png)
+
 java为channel主要提供了一下实现类：
 
-• FileChannel：用于读取、写入、映射和操作文件的通道。
+**一：File 类型 的channel**
 
-• SocketChannel：通过 TCP 读写网络中的数据。
+• FileChannel：用于读取、写入、映射和操作文件的通道。  
 
-• ServerSocketChannel：可以监听新进来的 TCP 连接，对每一个新进来
+此类型不能切换成非阻塞模式
+
+**二：网络 （Socket）channel**
+
+• SocketChannel：通过 TCP **读写**网络中的数据。
+
+• ServerSocketChannel：可以**监听**新进来的 TCP 连接，对每一个新进来
 的连接都会创建一个 SocketChannel。
 
-• DatagramChannel：通过 UDP 读写网络中的数据通道。
+• DatagramChannel：通过 UDP **读写**网络中的数据通道。
+
+#### 注意
+
+对于Socket通道来说存在直接创建新Socket通道的方法，而对于文件通道来说，升级之后的FileInputStream、FileOutputStream和RandomAccessFile提供了getChannel（）方法来获取通道。需要注意的是java.net包中的socket类也存在getChannel（）方法，但他返回的并非新通道。
+
+**通道既可以是单向的也可以是双向的**。
+
+只实现**ReadableByteChannel**接口中的read()方法或者只实现**WriteableByteChannel**接口中的write()方法的通道皆为**单向通道**，**同时ReadableByteChannelWriteableByteChannel为双向通道**，比如ByteChannel。
+
+**对于socket通道来说，它们一直是双向的**
+
+而对于**FileChannel**来说，它同样实现了ByteChannel，但是我们知道通过FileInputStream的getChannel（）获取的FileChannel**只具有文件的只读权限**，那此时的在该通道调用write（）会出现什么情况？不出意外的抛出了NonWriteChannelException异常。 
+
+通过以上，我们得出结论：**通道都与特定的I/O服务挂钩，并且通道的性能受限于所连接的I/O服务的性质**。
 
 ### 获取方式
 
@@ -734,4 +768,643 @@ java为channel主要提供了一下实现类：
 
   通过通道的静态方法 open() 打开并返回指定通道。
 
-### 直接用通道间的数据传输
+
+
+### FileChannel  常用方法（通道的API)
+
+直接使用通道的API操作缓存更形象
+
+![image-20210316160241767](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210316160241767.png)
+
+#### 关于read()方法理解
+
+缓冲区是数组实现的 即**底层是数组** 读入的时候，是从position位置开始放的，没有读到文件末流返回的时读到的字节数，读到文件末流返回-1
+
+缓冲区满了之后调用clear()方法进行所谓的清除，只是将position置位0，将limit置位capacity，并没有清除原本就存在的缓存数据，**再次读入从position=0开始，这时就是覆盖** 发生覆盖的场景显然是**缓存区大小<要读取的文件大小**
+
+**一次读取的字节数是缓冲区的大小**
+
+### 测试
+
+```java
+package com.spring.demo.test.niotest;
+
+import org.junit.Test;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
+/**
+ * @note Paths 是从文件系统下查找
+ */
+public class ChannelTest {
+    /**
+     * 利用通道完成文件的复制（非直接缓冲区）
+     * @throws IOException
+     */
+    @Test
+    public void test1() throws IOException {
+        FileInputStream fileInputStream = new FileInputStream("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\static\\1.jpg");
+        FileOutputStream fileOutputStream = new FileOutputStream("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\static\\2.jpg");
+
+        //获取通道
+        FileChannel inChannel = fileInputStream.getChannel();
+        FileChannel outChannel = fileOutputStream.getChannel();
+
+        //分配指定大小的缓冲区
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+
+        //将in通道中的数据存入缓冲区
+        while (inChannel.read(buffer) != -1){
+            //切换到读取状态
+            buffer.flip();
+            //将缓冲区数据写入out通道
+            outChannel.write(buffer);
+            buffer.clear();
+        }
+        outChannel.close();
+        inChannel.close();
+        fileOutputStream.close();
+        fileInputStream.close();
+    }
+
+    /**
+     * 使用注解缓冲区完成文件的复制 （内存映射文件的方式）
+     * @throws IOException
+     */
+    @Test
+    public void channelUseDirectTest() throws IOException {
+        FileChannel inChannel = FileChannel.open(Paths.get("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\static\\1.jpg"), StandardOpenOption.READ);
+        FileChannel outChannel = FileChannel.open(Paths.get("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\static\\2.jpg"),StandardOpenOption.WRITE,StandardOpenOption.READ,StandardOpenOption.CREATE_NEW);
+
+        //内存映射文件
+        MappedByteBuffer inMappedBuf = inChannel.map(FileChannel.MapMode.READ_ONLY,0,inChannel.size());
+        MappedByteBuffer outMappedBuf = outChannel.map(FileChannel.MapMode.READ_WRITE,0,inChannel.size());
+
+        //直接对缓冲区进行数据的读写操作
+        byte[] dst = new byte[inMappedBuf.limit()];
+        //传输数据到给定的数组
+        inMappedBuf.get(dst);
+        //将给定数组的完整数据传到这个buffer
+        outMappedBuf.put(dst);
+
+        inChannel.close();
+        outChannel.close();
+    }
+
+    /**
+     * 直接用通道间的传输
+     * 也是用的直接缓冲区
+     */
+    @Test
+    public void transformDirChannel() throws IOException {
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+        try {
+            //这里使用的Maven，但是Paths不搜索类路径中的文件,而是搜索文件系统中的文件. 这里取不到文件
+            //inChannel = FileChannel.open(Paths.get("static/1.jpg"), StandardOpenOption.READ);
+            inChannel = FileChannel.open(Paths.get("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\static\\1.jpg"), StandardOpenOption.READ);
+            outChannel = FileChannel.open(Paths.get("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\static\\2.jpg"), StandardOpenOption.WRITE, StandardOpenOption.READ, StandardOpenOption.CREATE_NEW);
+            //到哪去
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            //从哪来
+            //outChannel.transferFrom(inChannel,0,inChannel.size());
+            outChannel.close();
+            inChannel.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+```
+
+# 分散(Scatter)与聚集(Gather)
+
+## 介绍
+
+**分散**：
+
+![image-20210315232351190](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315232351190.png)
+
+**聚集**：
+
+![image-20210315232444238](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315232444238.png)
+
+## 注意
+
+但是如果一个能放下，就没有可分的
+
+## 测试
+
+```java
+package com.spring.demo.test.niotest;
+
+import org.junit.Test;
+
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+
+public class ScatterAndGatherTest {
+    /**
+     * 分散与聚集
+     * RandomAccessFile 也只能从文件系统中读取，不能从类路径下读取
+     */
+    @Test
+    public void test() {
+        //随机访问文件流
+        RandomAccessFile randomAccessFile1 = null;
+        //A channel for reading, writing, mapping, and manipulating a file.
+        FileChannel channel1 = null;
+        RandomAccessFile randomAccessFile2 = null;
+        FileChannel channel2 = null;
+        try {
+            randomAccessFile1 = new RandomAccessFile("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\1.txt", "rw");
+            //获取通道
+            channel1 = randomAccessFile1.getChannel();
+            //缓冲区1
+            ByteBuffer buffer1 = ByteBuffer.allocate(5);
+            //缓冲区2
+            ByteBuffer buffer2 = ByteBuffer.allocate(10);
+
+            //分散读取--------------------------
+            //初始化buffer数组
+            ByteBuffer[] buffers = {buffer1, buffer2};
+            //分散读：将该通道的字节序列 分散 读到多个缓冲区 合起来才是完整的字节序列
+            channel1.read(buffers,0,buffers.length);
+            //channel1.read(buffer1);
+            //channel1.read(buffer2);
+
+            for (ByteBuffer byteBuffer : buffers) {
+                //设置为读取状态
+                byteBuffer.flip();
+            }
+            //aaaab
+            System.out.println(new String(buffers[0].array(),0,buffers[0].limit()));
+            System.out.println("---------------------");
+            //bbbcccc
+            System.out.println(new String(buffers[1].array(),0,buffers[1].limit()));
+
+            //聚集写
+            randomAccessFile2 = new RandomAccessFile("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\2.txt","rw");
+            channel2 = randomAccessFile2.getChannel();
+            //aaaabbbbcccc
+            channel2.write(buffers);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+# 阻塞和非阻塞
+
+阻塞和非阻塞是**对于网络通信而言的**
+
+**传统的 IO 流都是阻塞式的**。也就是说，当一个线程调用 read() 或 write()时，该线程被阻塞，直到有一些数据被读取或写入，**该线程在此期间不能执行其他任务**。因此，在完成网络通信进行 IO 操作时，由于线程会阻塞，所以服务器端必须为每个客户端都提供一个独立的线程进行处理（多线程），不至于全部排队。当服务器端需要处理大量客户端时，由于线程数量是有限的，且依然没有解决阻塞问题，性能急剧下降。
+
+ **Java NIO 是非阻塞模式的**(配置阻塞方式为非阻塞或者使用多路复用器selector）。当线程从某通道进行读写数据时，若没有数据可用时，**该线程可以进行其他任务**。线程通常将非阻塞 IO 的空闲时间用于在其他通道上执行 IO 操作，所以单独的线程可以管理多个输入和输出通道。因此，**NIO 可以让服务器端使用一个或有限几个线程来同时处理连接到服务器端的所有客户端。**
+
+## channel与selectableChannel
+
+![image-20210317145817321](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317145817321.png)
+
+## SelectableChannel默认阻塞
+
+如**套接字**的某些操作可能会无限期地阻塞。例如，对**accept()**方法的调用可能会因为等待一个客户端连接而阻塞；对**read()**方法的调用可能会因为没有数据可读而阻塞，直到连接的另一端传来新的数据。
+
+总的来说，创建/接收连接或读写数据等I/O调用，都可能无限期地阻塞等待，直到底层的网络实现发生了什么。慢速的，有损耗的网络，或仅仅是简单的网络故障都可能导致任意时间的延迟。然而不幸的是，在调用一个方法之前无法知道其是否阻塞。
+
+NIO的channel抽象的一个重要特征就是可以通过配置它的阻塞行为，以实现非阻塞式的信道
+
+```java
+ channel.configureBlocking(false)
+```
+
+在非阻塞式信道上调用一个方法总是会**立即返回**。这种调用的返回值指示了所请求的操作完成的程度。例如，在一个非阻塞式ServerSocketChannel上调用accept()方法，如果有连接请求来了，则返回客户端SocketChannel，否则返回null。
+
+```java
+package com.spring.demo.test.niotest;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
+/**
+ * 这里是阻塞式，直接shutdown， 
+ *客户端  socketChannel.shutdownOutput(); 告知服务端我发送数据完毕
+ 服务端 socketchannel.shutdownInput(); 告知客户端我反馈数据完毕
+ */
+public class BeforeSelectorTest {
+    /**
+     * 客户端编写
+     * @throws IOException
+     */
+    @Test
+    public void client() throws IOException {
+        //获取网络通道
+        SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("127.0.0.1", 9898));
+        // 分配指定缓冲区大小
+        ByteBuffer buffer = ByteBuffer.allocate(300);
+        //获取本地文件通道
+        FileChannel fileChannel = FileChannel.open(Paths.get("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\1.txt"), StandardOpenOption.READ);
+        //    读取本地文件到缓冲区，并发送到服务端   read: 读取的字节数，可能为零，如果通道已到达流结束，则为-1
+        while (fileChannel.read(buffer) != -1) {
+            buffer.flip();
+            System.out.println(new String(buffer.array(), 0, buffer.limit()));
+            socketChannel.write(buffer);
+            buffer.clear();
+        }
+        //结束输出到通道，告诉服务端，发送数据完毕，不然下面的read会阻塞
+        socketChannel.shutdownOutput();
+        //接收服务端的反馈
+        int len = 0;
+        //read方法阻塞了
+        while ((len = socketChannel.read(buffer)) != -1){
+            buffer.flip();
+            System.out.println("反馈"+new String(buffer.array(),0,buffer.limit()));
+            buffer.clear();
+        }
+            //    关闭通道
+        socketChannel.close();
+        fileChannel.close();
+    }
+
+    /**
+     * ServerSocketChannel 面向流的就听套接字的可选通道，用来监听的
+     * 为每一个进来的连接都可以创建一个用来读写的socket通道
+     * 通过accept()方法
+     *
+     * @throws IOException
+     */
+    @Test
+    public void server() throws IOException {
+        //获取网络通道
+        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+        //    绑定连接
+        serverSocketChannel.bind(new InetSocketAddress(9898));
+        //    获取客户端连接的通道
+        SocketChannel socketchannel = serverSocketChannel.accept();
+        //本地文件通道
+        FileChannel outChannel = FileChannel.open(Paths.get("D:\\IDEAworkplace\\spring-demo\\src\\main\\resources\\3.txt"), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        //分配指定缓冲区
+        ByteBuffer buffer = ByteBuffer.allocate(300);
+        //接收客户端数据，并保存到本地  read:从通道读到缓冲区
+        while (socketchannel.read(buffer) != -1) {
+            buffer.flip();
+            outChannel.write(buffer);//write：从缓冲区写到通道
+            buffer.clear();
+        }
+        //服务端发送反馈给客户端
+        buffer.put("你好，服务端接收数据成功".getBytes());
+        buffer.flip();
+        socketchannel.write(buffer);//从缓冲区写到通道
+        //结束读入通道操作，告诉客户端，读入完毕
+        socketchannel.shutdownInput();
+        System.out.println("服务端反馈完毕");
+
+        //关闭通道
+        outChannel.close();
+        socketchannel.close();
+        serverSocketChannel.close();
+
+
+    }
+}
+
+```
+
+![image-20210317143630368](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317143630368.png)
+
+![image-20210317143643575](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317143643575.png)
+
+## Selector选择器（多路复用）
+
+选择器（Selector） 是 **SelectableChannel** 对象的**多路复用器**，Selector 可以同时**监控**多个 SelectableChannel 的 **IO 状况**，也就是说，**利用 Selector可使一个单独的线程管理多个 Channel**。Selector 是非阻塞 IO 的核心。
+
+SelectableChannle 的结构如下图：
+![image-20210317094716738](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317094716738.png)
+
+可以检测多个NIO channel，看看读或者写事件是否就绪。
+
+多个Channel以事件的方式可以注册到同一个Selector，从而达到用一个线程处理多个请求成为可能。
+
+![img](https://pic2.zhimg.com/80/v2-d9e6a8e0884e495a423a1d1de56b10e1_720w.jpg)
+
+![img](https://pic4.zhimg.com/80/v2-092382125d13983b0c91a168e2b35c77_720w.jpg)
+
+### 用法
+
+#### 创建 Selector 
+
+通过调用 Selector.open() 方法创建一个 Selector。
+
+```java
+        //创建selector
+        Selector selector = Selector.open();
+```
+
+#### 注册通道
+
+**先配置通道阻塞方式为非阻塞**，再以事件驱动的形式将channel注册到selector中，使用方法：SelectableChannel.register(Selector sel, int ops)
+
+![image-20210317202309627](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317202309627.png)
+
+int 类型的参数ops由**SelectionKey.class**提供
+
+#### 示例
+
+```java
+    //获取通道
+    DatagramChannel datagramChannel = DatagramChannel.open();
+    //配置为非阻塞方式
+    datagramChannel.configureBlocking(false);
+   //注册读事件到selector
+    datagramChannel.register(selector, SelectionKey.OP_READ);
+```
+
+
+
+#### SelectionKey
+
+##### 介绍
+
+![image-20210317203455148](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317203455148.png)
+
+##### 描述事件的常量
+
+用于注册方法registry(Selector sel,int ops)中的ops
+
+- OP_READ   读就绪
+- OP_WRITE   写就绪
+- OP_CONNECT 连接就绪
+- OP_ACCEPT  获取就绪
+
+```java
+ /**
+     * Operation-set bit for read operations.
+     *
+     * <p> Suppose that a selection key's interest set contains
+     * <tt>OP_READ</tt> at the start of a <a
+     * href="Selector.html#selop">selection operation</a>.  If the selector
+     * detects that the corresponding channel is ready for reading, has reached
+     * end-of-stream, has been remotely shut down for further reading, or has
+     * an error pending, then it will add <tt>OP_READ</tt> to the key's
+     * ready-operation set and add the key to its selected-key&nbsp;set.  </p>
+     */
+    public static final int OP_READ = 1 << 0;
+
+    /**
+     * Operation-set bit for write operations.
+     *
+     * <p> Suppose that a selection key's interest set contains
+     * <tt>OP_WRITE</tt> at the start of a <a
+     * href="Selector.html#selop">selection operation</a>.  If the selector
+     * detects that the corresponding channel is ready for writing, has been
+     * remotely shut down for further writing, or has an error pending, then it
+     * will add <tt>OP_WRITE</tt> to the key's ready set and add the key to its
+     * selected-key&nbsp;set.  </p>
+     */
+    public static final int OP_WRITE = 1 << 2;
+
+    /**
+     * Operation-set bit for socket-connect operations.
+     *
+     * <p> Suppose that a selection key's interest set contains
+     * <tt>OP_CONNECT</tt> at the start of a <a
+     * href="Selector.html#selop">selection operation</a>.  If the selector
+     * detects that the corresponding socket channel is ready to complete its
+     * connection sequence, or has an error pending, then it will add
+     * <tt>OP_CONNECT</tt> to the key's ready set and add the key to its
+     * selected-key&nbsp;set.  </p>
+     */
+    public static final int OP_CONNECT = 1 << 3;
+
+    /**
+     * Operation-set bit for socket-accept operations.
+     *
+     * <p> Suppose that a selection key's interest set contains
+     * <tt>OP_ACCEPT</tt> at the start of a <a
+     * href="Selector.html#selop">selection operation</a>.  If the selector
+     * detects that the corresponding server-socket channel is ready to accept
+     * another connection, or has an error pending, then it will add
+     * <tt>OP_ACCEPT</tt> to the key's ready set and add the key to its
+     * selected-key&nbsp;set.  </p>
+     */
+    public static final int OP_ACCEPT = 1 << 4;
+```
+
+若注册时不止监听一个事件，则可以使用“位或”操作符连接
+
+![image-20210317203314993](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317203314993.png)
+
+### Selector常用方法
+
+![image-20210317204023638](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317204023638.png)
+
+### 非阻塞
+
+#### TCP 类型channel
+
+ SocketChannel
+
+```java
+package com.spring.demo.test.niotest;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.util.Date;
+import java.util.Iterator;
+
+
+/**
+ * selector
+ *      实现非阻塞
+ *      需要配置channel阻塞方式为非阻塞
+ *      将channel通过registry以事件的方式注册到selector
+ *      
+ */
+public class SelectorNonBlockingTest {
+    /**
+     * 客户端编写
+     * socketChannel.configureBlocking(false);切换通道阻塞方式为非阻塞
+     * 
+     * 结合Scanner(System.in)可以多客户端做聊天室
+     *
+     * @throws IOException
+     */
+    @Test
+    public void client() throws IOException {
+        //获取网络通道
+        SocketChannel socketChannel = SocketChannel.open(new InetSocketAddress("127.0.0.1", 9898));
+        //切换为非阻塞模式
+        socketChannel.configureBlocking(false);
+        //分配缓冲区
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+        //向缓冲区存入数据
+        buffer.put(new Date().toString().getBytes());
+        buffer.flip();
+        //将缓冲区的数据写入通道
+        socketChannel.write(buffer);
+        buffer.clear();
+        //关闭通道
+        socketChannel.close();
+    }
+
+    /**
+     * ServerSocketChannel 面向流的就听套接字的可选通道，用来监听的
+     * 为每一个进来的连接都可以创建一个用来读写的socket通道
+     * 通过accept()方法
+     *
+     * @throws IOException
+     */
+    @Test
+    public void server() throws IOException {
+        //获取网络通道
+        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+        //配置阻塞方式为非阻塞
+        serverSocketChannel.configureBlocking(false);
+        //    绑定连接
+        serverSocketChannel.bind(new InetSocketAddress(9898));
+        //获取选择器
+        Selector selector = Selector.open();
+        //以事件驱动的方式注册到选择器上 SelectionKey选择键，表示监听的事件 类比accept()阻塞时等待
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        //如果有准备就绪的channel
+        while (selector.select() > 0) {
+            Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+            while (keyIterator.hasNext()) {
+                //获取准备就绪的事件
+                SelectionKey key = keyIterator.next();
+                if (key.isAcceptable()) {
+                    //为该链接创建一个socketChannel
+                    SocketChannel socketChannel = serverSocketChannel.accept();
+                    //    切换为非阻塞是
+                    socketChannel.configureBlocking(false);
+                    //    将该通道也注册到选择器上  监听它的读事件
+                    socketChannel.register(selector, SelectionKey.OP_READ);
+                } else if (key.isReadable()) {//如果就是得失读事件
+                    //获取读就绪的channel
+                    SocketChannel socketChannel = (SocketChannel) key.channel();
+                    //    创建缓冲区，来读
+                    ByteBuffer buffer = ByteBuffer.allocate(100);
+                    int len = 0;
+                    while ((len = socketChannel.read(buffer)) > 0) {
+                        buffer.flip();
+                        System.out.println(new String(buffer.array(), 0, buffer.limit()));
+                        buffer.clear();
+                    }
+                }
+                //取消选择键 避免一直是就绪的状态
+                keyIterator.remove();
+            }
+        }
+    }
+}
+
+
+```
+
+#### UDP类型channel
+
+ DatagramChannel
+
+```java
+   /**
+     * 发送端
+     *
+     * @throws IOException
+     */
+    @Test
+    public void send() throws IOException {
+        //获取通道  使用UDP(面向数据包的sockets)的channel
+        DatagramChannel datagramChannel = DatagramChannel.open();
+        //配置非阻塞
+        datagramChannel.configureBlocking(false);
+        //分配缓冲区
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+        //扫描器
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNext()) {
+            //获取输入的值
+            String str = scanner.next();
+            buffer.put((new Date().toString() + ":\n" + str).getBytes());
+            buffer.flip();
+            //将缓冲区的数据发送到服务端
+            datagramChannel.send(buffer, new InetSocketAddress("127.0.0.1", 9898));
+            buffer.clear();
+        }
+        datagramChannel.close();
+    }
+
+    @Test
+    public void receive() throws IOException {
+        //获取通道
+        DatagramChannel datagramChannel = DatagramChannel.open();
+        //配置为非阻塞方式
+        datagramChannel.configureBlocking(false);
+        //绑定连接
+        datagramChannel.bind(new InetSocketAddress(9898));
+        //创建selector
+        Selector selector = Selector.open();
+        //注册读事件到selector
+        datagramChannel.register(selector, SelectionKey.OP_READ);
+        /*
+        选择一组键，其对应的通道已准备好进行I/O操作。
+        这个方法执行一个阻塞选择操作。它只在至少一个通道被选择，这个选择器的唤醒方法被调用，或者当前线程被中断后才返回，无论哪个先出现。
+         */
+        while (selector.select() > 0) {
+            //iterator:返回集合元素的迭代器
+            Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+            while (keyIterator.hasNext()) {
+                SelectionKey key = keyIterator.next();
+                //如果是读就绪的channel
+                if (key.isReadable()) {
+                    ByteBuffer buffer = ByteBuffer.allocate(100);
+                    //将从客户端接受到的数据包传到buffer中 装不下的话，剩余的数据会被丢弃
+                    datagramChannel.receive(buffer);
+                    buffer.flip();
+                    System.out.println(new String(buffer.array(), 0, buffer.limit()));
+                    buffer.clear();
+                }
+            }
+            //从基础集合中移除该迭代器返回的最后一个元素(。
+            keyIterator.remove();
+        }
+
+
+    }
+```
+
+服务端
+
+![image-20210317171940427](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171940427.png)
+
+客户端1
+
+![image-20210317171924892](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171924892.png)
+
+客户端2
+
+![image-20210317171915118](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171915118.png)
