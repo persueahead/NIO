@@ -113,9 +113,9 @@ linux整体结构：
 
 ### jvm体系结构
 
-![image-20210315003816351](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315003816351.png)
+![image-20210315003816351](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315003816351.png)
 
-![image-20210315232141785](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315232141785.png)
+![image-20210315232141785](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315232141785.png)
 
 直接内存并不属于JVM的内存结构，它是物理机的内存，但是JVM虚拟机可以调用该部分内存。
 
@@ -297,7 +297,7 @@ public native void putByte(long address, byte x);
 
 
 
-![image-20210315003641234](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315003641234.png)
+![image-20210315003641234](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315003641234.png)
 
 ## 同步，异步，阻塞，非阻塞
 
@@ -347,11 +347,11 @@ public native void putByte(long address, byte x);
 
 IO流，直接就是数据以流的形式传输，流有起点，终点，不可逆
 
-![image-20210313214535875](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210313214535875.png)
+![image-20210313214535875](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210313214535875.png)
 
 NIO 输入和输出都是通过缓冲区，缓冲区是双向的
 
-![image-20210313221325995](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210313221325995.png)
+![image-20210313221325995](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210313221325995.png)
 
 ## 阻塞与非阻塞IO
 
@@ -473,11 +473,11 @@ JDK8里面，有五个属性，四个是核心属性
 
 mark只是默认为-1，除开默认情况， 0< mark <= position <= limit <= capacity
 
-![image-20210314170621605](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210314170621605.png)
+![image-20210314170621605](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210314170621605.png)
 
 ### 核心方法
 
-![image-20210314170831344](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210314170831344.png)
+![image-20210314170831344](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210314170831344.png)
 
 #### allocate
 
@@ -842,13 +842,13 @@ DMA是在专门的硬件（DMA）控制下，**实现高速外设和主存储器
 
 大量读写请求会造成DMA总线间的冲突
 
-![image-20210315093205004](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315093205004.png)
+![image-20210315093205004](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315093205004.png)
 
 ### channel
 
 后来 channel  完全独立的专门用于IO操作的处理器，有自己的指令，附属于CPU中央处理器
 
-![image-20210315093333828](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315093333828.png)
+![image-20210315093333828](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315093333828.png)
 
 ### DMA与channel对比
 
@@ -860,7 +860,7 @@ I/O通道控制方式与DMA方式的异同点：
 
 ### 实现类  （通道）
 
-![image-20210317092253422](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317092253422.png)
+![image-20210317092253422](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317092253422.png)
 
 java为channel主要提供了一下实现类：
 
@@ -923,7 +923,7 @@ java为channel主要提供了一下实现类：
 
 直接使用通道的API操作缓存更形象
 
-![image-20210316160241767](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210316160241767.png)
+![image-20210316160241767](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210316160241767.png)
 
 #### 关于read()方法理解
 
@@ -1041,11 +1041,11 @@ public class ChannelTest {
 
 **分散**：
 
-![image-20210315232351190](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315232351190.png)
+![image-20210315232351190](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315232351190.png)
 
 **聚集**：
 
-![image-20210315232444238](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210315232444238.png)
+![image-20210315232444238](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210315232444238.png)
 
 ## 注意
 
@@ -1125,7 +1125,7 @@ public class ScatterAndGatherTest {
 
 ## channel与selectableChannel
 
-![image-20210317145817321](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317145817321.png)
+![image-20210317145817321](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317145817321.png)
 
 ## SelectableChannel默认阻塞
 
@@ -1240,16 +1240,16 @@ public class BeforeSelectorTest {
 
 ```
 
-![image-20210317143630368](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317143630368.png)
+![image-20210317143630368](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317143630368.png)
 
-![image-20210317143643575](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317143643575.png)
+![image-20210317143643575](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317143643575.png)
 
 ## Selector选择器（多路复用）
 
 选择器（Selector） 是 **SelectableChannel** 对象的**多路复用器**，Selector 可以同时**监控**多个 SelectableChannel 的 **IO 状况**，也就是说，**利用 Selector可使一个单独的线程管理多个 Channel**。Selector 是非阻塞 IO 的核心。
 
 SelectableChannle 的结构如下图：
-![image-20210317094716738](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317094716738.png)
+![image-20210317094716738](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317094716738.png)
 
 可以检测多个NIO channel，看看读或者写事件是否就绪。
 
@@ -1295,7 +1295,7 @@ int 类型的参数ops由**SelectionKey.class**提供
 
 ##### 介绍
 
-![image-20210317203455148](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317203455148.png)
+![image-20210317203455148](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317203455148.png)
 
 ##### 描述事件的常量
 
@@ -1362,11 +1362,11 @@ int 类型的参数ops由**SelectionKey.class**提供
 
 若注册时不止监听一个事件，则可以使用“位或”操作符连接
 
-![image-20210317203314993](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317203314993.png)
+![image-20210317203314993](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317203314993.png)
 
 ### Selector常用方法
 
-![image-20210317204023638](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317204023638.png)
+![image-20210317204023638](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317204023638.png)
 
 ### 非阻塞
 
@@ -1548,21 +1548,21 @@ public class SelectorNonBlockingTest {
 
 服务端
 
-![image-20210317171940427](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171940427.png)
+![image-20210317171940427](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317171940427.png)
 
 客户端1
 
-![image-20210317171924892](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171924892.png)
+![image-20210317171924892](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317171924892.png)
 
 客户端2
 
-![image-20210317171915118](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171915118.png)
+![image-20210317171915118](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317171915118.png)
 
 # Pipe（管道）
 
 > A pair of channels that implements a unidirectional pipe.一对实现单向管道的通道
 
-![image-20210317220038324](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317220038324.png)
+![image-20210317220038324](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317220038324.png)
 
 
 
@@ -1655,7 +1655,7 @@ public class PipeTest {
 }
 ```
 
-![image-20210317221803190](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317221803190.png)
+![image-20210317221803190](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317221803190.png)
 
 # NIO2
 
@@ -1663,13 +1663,13 @@ public class PipeTest {
 
 ## Path与Paths
 
-![image-20210317225302697](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317225302697.png)
+![image-20210317225302697](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317225302697.png)
 
 ## Files
 
-![image-20210317225337029](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317225337029.png)
+![image-20210317225337029](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317225337029.png)
 
-![image-20210317225404720](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317225404720.png)
+![image-20210317225404720](https://gitee.com/deity_ztw/img_repository/raw/master/img/image-20210317225404720.png)
 
 ## 自动资源管理
 
