@@ -1,7 +1,92 @@
-# 介绍
-
- **Java NIO**（New IO）是从**Java 1.4**版本开始引入的一个新的**IO** API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同，**NIO支持面向缓冲区的、基于通道的IO操作。NIO将以更加高效的方式进行文件的读写操作。**
-
+- [预备知识](#预备知识)
+  - [内核态(内核空间)和用户态(用户空间)的区别和联系](#内核态内核空间和用户态用户空间的区别和联系)
+  - [直接内存](#直接内存)
+    - [jvm体系结构](#jvm体系结构)
+    - [直接内存的使用](#直接内存的使用)
+    - [正常IO读取](#正常io读取)
+    - [直接IO读取](#直接io读取)
+    - [直接内存分配](#直接内存分配)
+    - [unsafe类](#unsafe类)
+      - [介绍](#介绍)
+      - [内存操作](#内存操作)
+    - [直接内存回收](#直接内存回收)
+  - [操作系统空间和jvm空间的区别与联系](#操作系统空间和jvm空间的区别与联系)
+  - [同步，异步，阻塞，非阻塞](#同步异步阻塞非阻塞)
+- [NIO了解](#nio了解)
+  - [介绍](#介绍-1)
+  - [特点](#特点)
+  - [组件](#组件)
+    - [核心组件](#核心组件)
+    - [其他组件](#其他组件)
+- [NIO与IO的主要区别](#nio与io的主要区别)
+  - [面向](#面向)
+  - [阻塞与非阻塞IO](#阻塞与非阻塞io)
+  - [选择器](#选择器)
+  - [各自场景](#各自场景)
+- [BIO缺点](#bio缺点)
+- [通道（Channel ）与缓冲区（Buffer）](#通道channel-与缓冲区buffer)
+  - [缓冲区](#缓冲区)
+    - [举例  ByteBuffer](#举例--bytebuffer)
+    - [Buffer接口](#buffer接口)
+    - [四个核心属性](#四个核心属性)
+    - [核心方法](#核心方法)
+      - [allocate](#allocate)
+      - [allocateDirect](#allocatedirect)
+      - [put](#put)
+      - [flip](#flip)
+      - [get](#get)
+      - [rewind](#rewind)
+      - [remaining](#remaining)
+      - [mark](#mark)
+      - [reset](#reset)
+      - [clear](#clear)
+      - [测试](#测试)
+    - [直接缓冲区和非直接缓冲区](#直接缓冲区和非直接缓冲区)
+      - [非直接缓冲区](#非直接缓冲区)
+      - [直接缓冲区](#直接缓冲区)
+      - [比较](#比较)
+  - [通道](#通道)
+    - [介绍](#介绍-2)
+    - [DMA](#dma)
+      - [什么是DMA？](#什么是dma)
+      - [IO过程](#io过程)
+    - [channel](#channel)
+    - [DMA与channel对比](#dma与channel对比)
+    - [实现类  （通道）](#实现类--通道)
+      - [注意](#注意)
+    - [获取方式](#获取方式)
+    - [FileChannel  常用方法（通道的API)](#filechannel--常用方法通道的api)
+      - [关于read()方法理解](#关于read方法理解)
+    - [测试](#测试-1)
+- [分散(Scatter)与聚集(Gather)](#分散scatter与聚集gather)
+  - [介绍](#介绍-3)
+  - [注意](#注意-1)
+  - [测试](#测试-2)
+- [阻塞和非阻塞](#阻塞和非阻塞)
+  - [channel与selectableChannel](#channel与selectablechannel)
+  - [SelectableChannel默认阻塞](#selectablechannel默认阻塞)
+  - [Selector选择器（多路复用）](#selector选择器多路复用)
+    - [用法](#用法)
+      - [创建 Selector](#创建-selector)
+      - [注册通道](#注册通道)
+      - [示例](#示例)
+      - [SelectionKey](#selectionkey)
+        - [介绍](#介绍-4)
+        - [描述事件的常量](#描述事件的常量)
+    - [Selector常用方法](#selector常用方法)
+    - [非阻塞](#非阻塞)
+      - [TCP 类型channel](#tcp-类型channel)
+      - [UDP类型channel](#udp类型channel)
+- [Pipe（管道）](#pipe管道)
+  - [用法](#用法-1)
+    - [创建管道](#创建管道)
+    - [向管道写数据](#向管道写数据)
+    - [从管道读数据](#从管道读数据)
+  - [示例](#示例-1)
+- [NIO2](#nio2)
+  - [Path与Paths](#path与paths)
+  - [Files](#files)
+  - [自动资源管理](#自动资源管理)
 # 预备知识
 
 ## 内核态(内核空间)和用户态(用户空间)的区别和联系
@@ -218,6 +303,38 @@ public native void putByte(long address, byte x);
 
 参考：https://www.jb51.net/article/192321.htm
 
+# NIO了解
+
+## 介绍
+
+ **Java NIO**（New IO）是从**Java 1.4**版本开始引入的一个新的**IO** API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同，**NIO支持面向缓冲区的、基于通道的IO操作。NIO将以更加高效的方式进行文件的读写操作。**
+
+教程参考：http://ifeve.com/overview/
+
+## 特点
+
+1.使用通道，面向缓冲区
+
+2.一个线程可以处理多个通道减少线程的创建数量
+
+3.读写非阻塞，节约资源：没有可读/可写数据时，不会发生阻塞导致线程资源浪费
+
+## 组件
+
+### 核心组件
+
+- Channels
+- Buffers
+- Selectors
+
+### 其他组件
+
+与核心组件共同使用的工具类
+
+- Pipe
+- FileLock
+- ... ...
+
 # NIO与IO的主要区别
 
 | IO                      | NIO                         |
@@ -235,6 +352,38 @@ IO流，直接就是数据以流的形式传输，流有起点，终点，不可
 NIO 输入和输出都是通过缓冲区，缓冲区是双向的
 
 ![image-20210313221325995](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210313221325995.png)
+
+## 阻塞与非阻塞IO
+
+> Java IO的各种流是阻塞的。这意味着，当一个线程调用read() 或 write()时，该线程被阻塞，直到有一些数据被读取，或数据完全写入。该线程在此期间不能再干任何事情了。 Java NIO的非阻塞模式，使一个线程从某通道发送请求读取数据，但是它仅能得到目前可用的数据，**如果目前没有数据可用时，就什么都不会获取**。而不是保持线程阻塞，所以**直至数据变的可以读取之前，该线程可以继续做其他的事情**。 非阻塞写也是如此。一个线程请求写入一些数据到某通道，但不需要等待它完全写入，这个线程同时可以去做别的事情。 线程通常将非阻塞IO的空闲时间用于在其它通道上执行IO操作，所以一个单独的线程现在可以管理多个输入和输出通道（channel配合selector）。
+
+## 选择器
+
+> Java NIO的选择器允许一个单独的线程来监视多个输入通道，你可以注册多个通道使用一个选择器，然后使用一个单独的线程来“选择”通道：这些通道里已经有可以处理的输入，或者选择已准备写入的通道。这种选择机制，使得一个单独的线程很容易来管理多个通道。
+
+## 各自场景
+
+> NIO可让您只使用一个（或几个）单线程管理多个通道（网络连接或文件），但付出的代价是**解析数据可能会比从一个阻塞流中读取数据更复杂。**
+>
+> 如果需要管理同时打开的成千上万个连接，这些连接每次只是**发送少量的数据**，例如聊天服务器，实现NIO的服务器可能是一个优势。同样，如果你需要维持许多打开的连接到其他计算机上，如P2P网络中，使用一个单独的线程来管理你所有出站连接，可能是一个优势。一个线程多个连接的设计方案如下图所示：
+>
+> ![Java NIO: A single thread managing multiple connections.](http://tutorials.jenkov.com/images/java-nio/nio-vs-io-3.png)
+>
+> **Java NIO: 单线程管理多个连接**
+
+> 如果你有少量的连接使用非常高的带宽，一次发送大量的数据，也许典型的IO服务器实现可能非常契合。下图说明了一个典型的IO服务器设计：
+>
+> ![Java IO: A classic IO server design - one connection handled by one thread.](http://tutorials.jenkov.com/images/java-nio/nio-vs-io-4.png)
+>
+> **Java IO: 一个典型的IO服务器设计- 一个连接通过一个线程处理.**
+
+# BIO缺点
+
+1. 一个客户端对应一个线程，当用户请求连接后，什么都不做，也需要开启一个线程来服务一个客户，造成**资源的浪费。**
+2. 当客户多的时候，服务器会创建很多的线程进行服务，这样会使得服务器压力太大，造成线程栈溢出，服务器宕机等问题
+3. 线程之间频繁的切换上下文影响了服务器的性能
+
+即便，使用线程池技术处理用户请求，即使用户请求过多也不会导致线程栈溢出，但是本质没变，同一时间还是一个线程处理一个请求。还是**同步阻塞模型**。同步阻塞模型不适用与高并发
 
 # 通道（Channel ）与缓冲区（Buffer）
 
@@ -732,7 +881,7 @@ java为channel主要提供了一下实现类：
 
 #### 注意
 
-对于Socket通道来说存在直接创建新Socket通道的方法，而对于文件通道来说，升级之后的FileInputStream、FileOutputStream和RandomAccessFile提供了getChannel（）方法来获取通道。需要注意的是java.net包中的socket类也存在getChannel（）方法，但他返回的并非新通道。
+对于**Socket通道**来说存在直接创建新Socket通道的方法，而对于文件通道来说，升级之后的FileInputStream、FileOutputStream和RandomAccessFile提供了getChannel（）方法来获取通道。需要注意的是java.net包中的socket类也存在getChannel（）方法，但他返回的并非新通道。
 
 **通道既可以是单向的也可以是双向的**。
 
@@ -1408,3 +1557,140 @@ public class SelectorNonBlockingTest {
 客户端2
 
 ![image-20210317171915118](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317171915118.png)
+
+# Pipe（管道）
+
+> A pair of channels that implements a unidirectional pipe.一对实现单向管道的通道
+
+![image-20210317220038324](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317220038324.png)
+
+
+
+```java
+ /**
+     * A channel representing the writable end of a {@link Pipe}.
+     *一个通道，代表管道Pipe的可写端
+     * @since 1.4
+     */
+    public static abstract class SinkChannel
+        extends AbstractSelectableChannel
+        implements WritableByteChannel, GatheringByteChannel
+        {。。。 。。。}
+```
+
+```java
+/**
+* A channel representing the readable end of a {@link Pipe}.
+一个通道，代表管道pipe的可读端
+*/
+public static abstract class SourceChannel
+        extends AbstractSelectableChannel
+        implements ReadableByteChannel, ScatteringByteChannel
+    {... ...}
+```
+
+## 用法
+
+### 创建管道
+
+```java
+ //获取管道
+        Pipe pipe = Pipe.open();
+```
+
+### 向管道写数据
+
+获取可写端
+
+```java
+ Pipe.SinkChannel sink = pipe.sink();//表示管道可写端的通道
+```
+
+写入管道
+
+```java
+ sink.write(buffer);//利用sink将buffer中的数据写入管道
+```
+
+### 从管道读数据
+
+获取管道的可读端
+
+```java
+        //    读取管道中的数据
+        Pipe.SourceChannel source = pipe.source();//创建管道的可读端
+```
+
+从管道读数据
+
+```java
+int len = source.read(buffer);//将该channel的字节读到buffer中,len为读取的字节数
+```
+
+
+
+## 示例
+
+```java
+public class PipeTest {
+    @Test
+    public void pipeTest() throws IOException {
+        //获取管道
+        Pipe pipe = Pipe.open();
+        //将缓冲区的数据写入管道
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+        Pipe.SinkChannel sink = pipe.sink();//表示管道可写端的通道
+        buffer.put("通过单向管道发送数据".getBytes());
+        buffer.flip();
+        sink.write(buffer);//利用sink将buffer中的数据写入管道
+
+        //上面的可以放到一个线程中，下面的又可以放到一个线程中，进行单向传输----------------------
+
+        //    读取缓冲区中的数据
+        Pipe.SourceChannel source = pipe.source();
+        buffer.flip();
+        int len = source.read(buffer);//将该channel的字节读到buffer中
+        System.out.println(new String(buffer.array(),0,len));
+    }
+}
+```
+
+![image-20210317221803190](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317221803190.png)
+
+# NIO2
+
+ 随着 JDK 7 的发布，Java对NIO进行了极大的扩展，增强了对文件处理和文件系统特性的支持，以至于我们称他们为 NIO.2。因为 NIO 提供的一些功能，NIO已经成为文件处理中越来越重要的部分。
+
+## Path与Paths
+
+![image-20210317225302697](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317225302697.png)
+
+## Files
+
+![image-20210317225337029](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317225337029.png)
+
+![image-20210317225404720](C:\Users\夜神\AppData\Roaming\Typora\typora-user-images\image-20210317225404720.png)
+
+## 自动资源管理
+
+Java 7 增加了一个新特性，该特性提供了另外一种管理资源的方式，这种方式能自动关闭文件。这个特性有时被称为自动资源管理(Automatic Resource Management, ARM)， 该特性以 try 语句的扩展版为基础。自动资源管理主要用于，当不再需要文件（或其他资源）时，可以防止无意中忘记释放它们
+
+自动资源管理基于 try 语句的扩展形式：
+
+```java
+try(需要关闭的资源声明){
+//可能发生异常的语句
+}catch(异常类型 变量名){
+//异常的处理语句
+}
+……
+finally{
+//一定执行的语句
+}
+```
+
+当 try 代码块结束时，自动释放资源。因此不需要显示的调用 close() 方法。该形式也称为“带资源的 try 语句”。
+注意：
+①try 语句中声明的资源被隐式声明为 final ，资源的作用局限于带资源的 try 语句
+②可以在一条 try 语句中管理多个资源，每个资源以“;” 隔开即可。
+③需要关闭的资源，必须实现了 AutoCloseable 接口或其自接口 Closeable
